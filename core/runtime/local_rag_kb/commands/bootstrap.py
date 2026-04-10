@@ -5,7 +5,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-from ..config import PROJECT_ROOT
+from ..paths import PROJECT_ROOT
 
 
 def build_parser() -> argparse.ArgumentParser:

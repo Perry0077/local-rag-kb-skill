@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import gzip
 from pathlib import Path
 import tarfile
 import zipfile
@@ -25,9 +26,21 @@ def build_zip() -> Path:
 def build_tar() -> Path:
     target = OUTPUT_ROOT / "mixed_docs.tar.gz"
     target.parent.mkdir(parents=True, exist_ok=True)
-    with tarfile.open(target, "w:gz") as archive:
-        for path in sorted((SOURCE_ROOT / "archive_tar").rglob("*")):
-            archive.add(path, arcname=path.relative_to(SOURCE_ROOT / "archive_tar"))
+
+    def normalize(info: tarfile.TarInfo) -> tarfile.TarInfo:
+        info.mtime = 0
+        info.uid = 0
+        info.gid = 0
+        info.uname = ""
+        info.gname = ""
+        return info
+
+    with target.open("wb") as raw_stream:
+        with gzip.GzipFile(filename="", mode="wb", fileobj=raw_stream, mtime=0) as gzip_stream:
+            with tarfile.open(fileobj=gzip_stream, mode="w") as archive:
+                for path in sorted((SOURCE_ROOT / "archive_tar").rglob("*")):
+                    if path.is_file():
+                        archive.add(path, arcname=path.relative_to(SOURCE_ROOT / "archive_tar"), filter=normalize)
     return target
 
 

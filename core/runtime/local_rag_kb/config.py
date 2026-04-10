@@ -7,9 +7,9 @@ from typing import Optional
 
 from dotenv import load_dotenv
 
+from .paths import PROJECT_ROOT
 from .utils import slugify
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_CHUNK_SIZE = 500
 DEFAULT_CHUNK_OVERLAP = 100
 DEFAULT_RETRIEVE_K = 15

@@ -39,6 +39,19 @@ Use this skill when the user wants to:
 
 ## Runtime workflow
 
+### Interpreter and host selection
+
+- Prefer the skill-local interpreter for all runtime commands: `.venv/bin/python`
+- If `.venv/bin/python` does not exist yet, run `python3 scripts/kb_bootstrap.py`
+- After bootstrap completes, use `.venv/bin/python` for:
+  - `scripts/kb_ingest.py`
+  - `scripts/kb_query.py`
+  - `scripts/kb_status.py`
+  - `scripts/kb_list.py`
+  - `scripts/kb_rebuild.py`
+  - `scripts/kb_delete.py`
+- Always pass `--host {{HOST_NAME}}` to runtime commands unless the environment already sets `LOCAL_RAG_KB_HOST={{HOST_NAME}}`
+
 ### First-run config
 
 If `EMBEDDING_API_KEY` is missing:
@@ -53,29 +66,30 @@ If `EMBEDDING_API_KEY` is missing:
    - `https://api.openai.com/v1`
    - `text-embedding-3-small`
 5. If the environment allows writing config files, write the values to the installed skill `.env`
-6. Otherwise tell the user exactly which variables they need to set before retrying
+6. Ensure the installed skill `.env` also keeps `LOCAL_RAG_KB_HOST={{HOST_NAME}}`
+7. Otherwise tell the user exactly which variables they need to set before retrying
 
 ### Ingest
 
 1. Resolve the KB name
 2. Run `scripts/kb_bootstrap.py` if the environment is missing
-3. Run `scripts/kb_ingest.py --input <path> [--kb <name>]`
+3. Run `.venv/bin/python scripts/kb_ingest.py --host {{HOST_NAME}} --input <path> [--kb <name>]`
 4. Report updated docs, unchanged docs, and total chunks
 
 ### Query
 
 1. Resolve the KB name
-2. If the host model should answer, run `scripts/kb_query.py --question "<question>" [--kb <name>] --emit-host-bundle`
+2. If the host model should answer, run `.venv/bin/python scripts/kb_query.py --host {{HOST_NAME}} --question "<question>" [--kb <name>] --emit-host-bundle`
 3. Compose the final answer in the host model using only the returned bundle
-4. If the user explicitly configured `CHAT_BACKEND=openai-compatible`, `scripts/kb_query.py --answer` may generate the answer directly
+4. If the user explicitly configured `CHAT_BACKEND=openai-compatible`, `.venv/bin/python scripts/kb_query.py --host {{HOST_NAME}} --answer` may generate the answer directly
 5. Use `--show-details` only when the user asks for retrieval internals
 
 ### Admin
 
-- `scripts/kb_status.py`
-- `scripts/kb_list.py`
-- `scripts/kb_rebuild.py`
-- `scripts/kb_delete.py`
+- `.venv/bin/python scripts/kb_status.py --host {{HOST_NAME}}`
+- `.venv/bin/python scripts/kb_list.py --host {{HOST_NAME}}`
+- `.venv/bin/python scripts/kb_rebuild.py --host {{HOST_NAME}}`
+- `.venv/bin/python scripts/kb_delete.py --host {{HOST_NAME}}`
 
 ## Output rules
 

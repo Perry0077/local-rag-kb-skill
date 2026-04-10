@@ -32,9 +32,17 @@ Data root override:
 
 The bootstrap command creates a local `.venv` under the installed skill directory and installs dependencies from `requirements.txt`.
 
+After bootstrap, the host should prefer `.venv/bin/python` for all runtime commands instead of the system Python.
+
 Important:
 
 - `CHAT_BACKEND=host` means the host orchestration layer should call `kb_query.py --emit-host-bundle` and let the host model write the final answer
 - `CHAT_BACKEND=openai-compatible` means `kb_query.py --answer` may call a remote chat API directly
 
 If `EMBEDDING_API_KEY` is missing, the skill should not ingest files yet. It should ask the user for an OpenAI-compatible embedding key first, then retry ingestion after the environment is configured.
+
+For host-packaged installs, keep `LOCAL_RAG_KB_HOST` aligned with the installed host:
+
+- Codex package: `LOCAL_RAG_KB_HOST=codex`
+- OpenClaw package: `LOCAL_RAG_KB_HOST=openclaw`
+- Claude Code package: `LOCAL_RAG_KB_HOST=claude-code`

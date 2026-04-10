@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -15,7 +17,7 @@ FIXTURES = ROOT / "fixtures"
 class LocalRagKbSkillTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        subprocess.run(["python3", str(ROOT / "tools" / "rebuild_fixtures.py")], check=True)
+        subprocess.run([sys.executable, str(ROOT / "tools" / "rebuild_fixtures.py")], check=True)
 
     def run_command(self, args: list[str], env: dict[str, str]) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
@@ -42,7 +44,7 @@ class LocalRagKbSkillTests(unittest.TestCase):
 
             ingest_basic = self.run_command(
                 [
-                    "python3",
+                    sys.executable,
                     str(ROOT / "core" / "skill" / "scripts" / "kb_ingest.py"),
                     "--input",
                     str(FIXTURES / "sources" / "basic" / "launch_notes.md"),
@@ -54,7 +56,7 @@ class LocalRagKbSkillTests(unittest.TestCase):
 
             ingest_zip = self.run_command(
                 [
-                    "python3",
+                    sys.executable,
                     str(ROOT / "core" / "skill" / "scripts" / "kb_ingest.py"),
                     "--input",
                     str(FIXTURES / "input" / "nested_docs.zip"),
@@ -66,7 +68,7 @@ class LocalRagKbSkillTests(unittest.TestCase):
 
             ingest_tar = self.run_command(
                 [
-                    "python3",
+                    sys.executable,
                     str(ROOT / "core" / "skill" / "scripts" / "kb_ingest.py"),
                     "--input",
                     str(FIXTURES / "input" / "mixed_docs.tar.gz"),
@@ -79,7 +81,7 @@ class LocalRagKbSkillTests(unittest.TestCase):
 
             ingest_txt = self.run_command(
                 [
-                    "python3",
+                    sys.executable,
                     str(ROOT / "core" / "skill" / "scripts" / "kb_ingest.py"),
                     "--input",
                     str(FIXTURES / "sources" / "basic" / "revenue_notes.txt"),
@@ -91,7 +93,7 @@ class LocalRagKbSkillTests(unittest.TestCase):
 
             ingest_repeat = self.run_command(
                 [
-                    "python3",
+                    sys.executable,
                     str(ROOT / "core" / "skill" / "scripts" / "kb_ingest.py"),
                     "--input",
                     str(FIXTURES / "sources" / "basic" / "revenue_notes.txt"),
@@ -103,7 +105,7 @@ class LocalRagKbSkillTests(unittest.TestCase):
 
             query = self.run_command(
                 [
-                    "python3",
+                    sys.executable,
                     str(ROOT / "core" / "skill" / "scripts" / "kb_query.py"),
                     "--question",
                     "Why can one broken provider affect many products at once?",
@@ -120,7 +122,7 @@ class LocalRagKbSkillTests(unittest.TestCase):
 
             host_answer_error = subprocess.run(
                 [
-                    "python3",
+                    sys.executable,
                     str(ROOT / "core" / "skill" / "scripts" / "kb_query.py"),
                     "--question",
                     "Why can one broken provider affect many products at once?",
@@ -137,7 +139,7 @@ class LocalRagKbSkillTests(unittest.TestCase):
 
             status = self.run_command(
                 [
-                    "python3",
+                    sys.executable,
                     str(ROOT / "core" / "skill" / "scripts" / "kb_status.py"),
                 ],
                 env,
@@ -147,7 +149,7 @@ class LocalRagKbSkillTests(unittest.TestCase):
 
             rebuild = self.run_command(
                 [
-                    "python3",
+                    sys.executable,
                     str(ROOT / "core" / "skill" / "scripts" / "kb_rebuild.py"),
                     "--local-test-embeddings",
                 ],
@@ -157,7 +159,7 @@ class LocalRagKbSkillTests(unittest.TestCase):
 
     def test_build_targets(self) -> None:
         result = subprocess.run(
-            ["python3", str(ROOT / "tools" / "build_targets.py"), "--host", "all"],
+            [sys.executable, str(ROOT / "tools" / "build_targets.py"), "--host", "all"],
             cwd=str(ROOT),
             capture_output=True,
             text=True,
@@ -167,6 +169,64 @@ class LocalRagKbSkillTests(unittest.TestCase):
         self.assertTrue((ROOT / "dist" / "codex" / "local-rag-kb" / "SKILL.md").exists())
         self.assertTrue((ROOT / "dist" / "openclaw" / "local-rag-kb" / "agents" / "openai.yaml").exists())
         self.assertTrue((ROOT / "dist" / "claude-code" / "local-rag-kb" / "SKILL.md").exists())
+        self.assertIn(
+            "LOCAL_RAG_KB_HOST=openclaw",
+            (ROOT / "dist" / "openclaw" / "local-rag-kb" / ".env.example").read_text(encoding="utf-8"),
+        )
+
+    def test_openclaw_dist_package_smoke(self) -> None:
+        subprocess.run(
+            [sys.executable, str(ROOT / "tools" / "build_targets.py"), "--host", "openclaw"],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        skill_root = ROOT / "dist" / "openclaw" / "local-rag-kb"
+        paths_module_path = skill_root / "runtime" / "local_rag_kb" / "paths.py"
+        spec = importlib.util.spec_from_file_location("local_rag_kb_dist_paths", paths_module_path)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self.assertEqual(module.PROJECT_ROOT, skill_root.resolve())
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            env = os.environ.copy()
+            env["LOCAL_RAG_KB_DATA_DIR"] = str(Path(temp_dir) / "openclaw-data")
+            env["CHAT_BACKEND"] = "host"
+
+            ingest = self.run_command(
+                [
+                    sys.executable,
+                    str(skill_root / "scripts" / "kb_ingest.py"),
+                    "--host",
+                    "openclaw",
+                    "--input",
+                    str(FIXTURES / "input" / "nested_docs.zip"),
+                    "--local-test-embeddings",
+                ],
+                env,
+            )
+            self.assertIn("Updated docs: 2", ingest.stdout)
+
+            query = self.run_command(
+                [
+                    sys.executable,
+                    str(skill_root / "scripts" / "kb_query.py"),
+                    "--host",
+                    "openclaw",
+                    "--question",
+                    "Why can one outage hit many products at once?",
+                    "--emit-host-bundle",
+                    "--local-test-embeddings",
+                ],
+                env,
+            )
+            bundle = json.loads(query.stdout)
+            self.assertEqual(bundle["kb_name"], "default")
+            self.assertTrue(bundle["references"])
 
 
 if __name__ == "__main__":

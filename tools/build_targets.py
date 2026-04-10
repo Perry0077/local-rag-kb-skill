@@ -30,6 +30,22 @@ def render_skill_md(host: str) -> str:
     )
 
 
+def render_env_example(host: str) -> str:
+    return (
+        f"LOCAL_RAG_KB_HOST={host}\n"
+        "# LOCAL_RAG_KB_DATA_DIR=/absolute/path/to/local-rag-kb-data\n"
+        "\n"
+        "EMBEDDING_API_KEY=\n"
+        "EMBEDDING_BASE_URL=https://api.openai.com/v1\n"
+        "EMBEDDING_MODEL=text-embedding-3-small\n"
+        "\n"
+        "CHAT_BACKEND=host\n"
+        "CHAT_API_KEY=\n"
+        "CHAT_BASE_URL=https://api.openai.com/v1\n"
+        "CHAT_MODEL=gpt-5.4\n"
+    )
+
+
 def copy_tree(source: Path, destination: Path) -> None:
     if source.exists():
         shutil.copytree(source, destination)
@@ -50,7 +66,7 @@ def build_host(host: str) -> Path:
 
     (skill_root / "SKILL.md").write_text(render_skill_md(host), encoding="utf-8")
     shutil.copy2(ROOT / "requirements.txt", skill_root / "requirements.txt")
-    shutil.copy2(ROOT / ".env.example", skill_root / ".env.example")
+    (skill_root / ".env.example").write_text(render_env_example(host), encoding="utf-8")
 
     openai_yaml = WRAPPERS / host / "openai.yaml"
     if openai_yaml.exists():
