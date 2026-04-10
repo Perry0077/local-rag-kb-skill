@@ -4,7 +4,7 @@ A reusable local RAG skill project for Codex, OpenClaw, and Claude Code.
 
 It ingests markdown or text documents from single files or archives, stores vectors in a local ChromaDB, keeps a document registry for incremental updates, and returns answer-ready context with references.
 
-中文说明: [README.zh-CN.md](/Users/perry/Projects/local-rag-kb-skill/README.zh-CN.md)
+中文说明: [README.zh-CN.md](README.zh-CN.md)
 
 ## What it does
 
@@ -121,13 +121,13 @@ Sync to local install directories:
 
 The built payloads land under:
 
-- [dist/codex/local-rag-kb](/Users/perry/Projects/local-rag-kb-skill/dist/codex/local-rag-kb)
-- [dist/openclaw/local-rag-kb](/Users/perry/Projects/local-rag-kb-skill/dist/openclaw/local-rag-kb)
-- [dist/claude-code/local-rag-kb](/Users/perry/Projects/local-rag-kb-skill/dist/claude-code/local-rag-kb)
+- `dist/codex/local-rag-kb`
+- `dist/openclaw/local-rag-kb`
+- `dist/claude-code/local-rag-kb`
 
 Release archives land under:
 
-- [release](/Users/perry/Projects/local-rag-kb-skill/release)
+- `release/`
 
 ## Host-answer orchestration
 

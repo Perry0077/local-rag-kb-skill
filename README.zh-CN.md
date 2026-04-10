@@ -4,7 +4,7 @@
 
 它可以从单文件或压缩包中导入 Markdown / 文本资料，写入本地 ChromaDB，维护增量更新注册表，并产出带引用的检索上下文或最终回答。
 
-English README: [README.md](/Users/perry/Projects/local-rag-kb-skill/README.md)
+English README: [README.md](README.md)
 
 ## 功能
 
@@ -130,13 +130,13 @@ CHAT_MODEL=gpt-5.4 \
 
 构建产物输出到：
 
-- [dist/codex/local-rag-kb](/Users/perry/Projects/local-rag-kb-skill/dist/codex/local-rag-kb)
-- [dist/openclaw/local-rag-kb](/Users/perry/Projects/local-rag-kb-skill/dist/openclaw/local-rag-kb)
-- [dist/claude-code/local-rag-kb](/Users/perry/Projects/local-rag-kb-skill/dist/claude-code/local-rag-kb)
+- `dist/codex/local-rag-kb`
+- `dist/openclaw/local-rag-kb`
+- `dist/claude-code/local-rag-kb`
 
 发布压缩包输出到：
 
-- [release](/Users/perry/Projects/local-rag-kb-skill/release)
+- `release/`
 
 ## OpenClaw 使用建议
 
