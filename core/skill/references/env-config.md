@@ -34,6 +34,19 @@ The bootstrap command creates a local `.venv` under the installed skill director
 
 After bootstrap, the host should prefer `.venv/bin/python` for all runtime commands instead of the system Python.
 
+If `.venv` cannot be created because `python3 -m venv` or `ensurepip` is unavailable, the host may fall back to system `python3`.
+
+That fallback is valid only when system `python3` can import:
+
+- `openai`
+- `chromadb`
+- `dotenv`
+- `tqdm`
+
+If those imports are missing and the host can install user-level packages, install:
+
+- `python3 -m pip install --user openai chromadb python-dotenv tqdm`
+
 Important:
 
 - `CHAT_BACKEND=host` means the host orchestration layer should call `kb_query.py --emit-host-bundle` and let the host model write the final answer

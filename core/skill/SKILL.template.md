@@ -43,6 +43,15 @@ Use this skill when the user wants to:
 
 - Prefer the skill-local interpreter for all runtime commands: `.venv/bin/python`
 - If `.venv/bin/python` does not exist yet, run `python3 scripts/kb_bootstrap.py`
+- If bootstrap fails because `python3 -m venv` or `ensurepip` is unavailable, do not stop there
+- In that case, fall back to system `python3` if it can import:
+  - `openai`
+  - `chromadb`
+  - `dotenv`
+  - `tqdm`
+- If system `python3` is missing those packages and the host can install user-level Python packages, run:
+  - `python3 -m pip install --user openai chromadb python-dotenv tqdm`
+- When `.venv/bin/python` is unavailable but system `python3` has the required imports, use system `python3` for all skill commands
 - After bootstrap completes, use `.venv/bin/python` for:
   - `scripts/kb_ingest.py`
   - `scripts/kb_query.py`
@@ -73,23 +82,26 @@ If `EMBEDDING_API_KEY` is missing:
 
 1. Resolve the KB name
 2. Run `scripts/kb_bootstrap.py` if the environment is missing
-3. Run `.venv/bin/python scripts/kb_ingest.py --host {{HOST_NAME}} --input <path> [--kb <name>]`
-4. Report updated docs, unchanged docs, and total chunks
+3. If `.venv/bin/python` exists, run `.venv/bin/python scripts/kb_ingest.py --host {{HOST_NAME}} --input <path> [--kb <name>]`
+4. Otherwise run `python3 scripts/kb_ingest.py --host {{HOST_NAME}} --input <path> [--kb <name>]`
+5. Report updated docs, unchanged docs, and total chunks
 
 ### Query
 
 1. Resolve the KB name
-2. If the host model should answer, run `.venv/bin/python scripts/kb_query.py --host {{HOST_NAME}} --question "<question>" [--kb <name>] --emit-host-bundle`
-3. Compose the final answer in the host model using only the returned bundle
-4. If the user explicitly configured `CHAT_BACKEND=openai-compatible`, `.venv/bin/python scripts/kb_query.py --host {{HOST_NAME}} --answer` may generate the answer directly
-5. Use `--show-details` only when the user asks for retrieval internals
+2. If the host model should answer and `.venv/bin/python` exists, run `.venv/bin/python scripts/kb_query.py --host {{HOST_NAME}} --question "<question>" [--kb <name>] --emit-host-bundle`
+3. If `.venv/bin/python` is unavailable, run `python3 scripts/kb_query.py --host {{HOST_NAME}} --question "<question>" [--kb <name>] --emit-host-bundle`
+4. Compose the final answer in the host model using only the returned bundle
+5. If the user explicitly configured `CHAT_BACKEND=openai-compatible`, prefer `.venv/bin/python scripts/kb_query.py --host {{HOST_NAME}} --answer`, but use `python3` when `.venv/bin/python` is unavailable
+6. Use `--show-details` only when the user asks for retrieval internals
 
 ### Admin
 
-- `.venv/bin/python scripts/kb_status.py --host {{HOST_NAME}}`
-- `.venv/bin/python scripts/kb_list.py --host {{HOST_NAME}}`
-- `.venv/bin/python scripts/kb_rebuild.py --host {{HOST_NAME}}`
-- `.venv/bin/python scripts/kb_delete.py --host {{HOST_NAME}}`
+- Prefer `.venv/bin/python scripts/kb_status.py --host {{HOST_NAME}}`
+- Prefer `.venv/bin/python scripts/kb_list.py --host {{HOST_NAME}}`
+- Prefer `.venv/bin/python scripts/kb_rebuild.py --host {{HOST_NAME}}`
+- Prefer `.venv/bin/python scripts/kb_delete.py --host {{HOST_NAME}}`
+- If `.venv/bin/python` is unavailable, use `python3` for the same commands instead
 
 ## Output rules
 

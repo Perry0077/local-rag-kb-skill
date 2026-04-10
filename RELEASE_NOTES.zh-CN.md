@@ -6,19 +6,20 @@
 
 建议 Release 标题：
 
-- `local-rag-kb-skill v0.1.0`
+- `local-rag-kb-skill v0.1.1`
 
 ## Release 简介
 
 `local-rag-kb-skill` 是一个面向 OpenClaw、Codex、Claude Code 的通用本地知识库 RAG skill。它支持从 markdown、txt、zip、tar、tar.gz、tgz 导入内容，使用本地 ChromaDB 存储向量，并通过宿主编排层生成带引用的回答。
 
-这个版本重点补齐了 OpenClaw 的安装与编排路径：
+这个版本重点补齐了 OpenClaw 的安装与编排路径，并补充了 no-venv fallback：
 
 - 支持 OpenClaw 目标产物构建与打包
 - OpenClaw 安装态下可正确 bootstrap 本地 `.venv`
 - OpenClaw 产物默认写入 `LOCAL_RAG_KB_HOST=openclaw`
 - 查询时输出 host bundle，由宿主主模型生成最终回答
 - 提供面向 OpenClaw 用户的安装、配置、导入、查询提示词
+- 当 `ensurepip` 或 `python3 -m venv` 不可用时，允许回退到系统 `python3`
 
 ## 核心能力
 
@@ -50,7 +51,8 @@ OpenClaw 推荐路径：
 3. 复制 `.env.example` 为 `.env`
 4. 配置 `EMBEDDING_API_KEY`
 5. 运行 `python3 scripts/kb_bootstrap.py`
-6. 之后由宿主优先使用 `.venv/bin/python`
+6. 如果 `.venv` 无法创建，改用系统 `python3`
+7. 之后由宿主优先使用 `.venv/bin/python`，否则使用系统 `python3`
 
 详细说明见：
 
@@ -65,6 +67,7 @@ OpenClaw 推荐路径：
 - `kb_bootstrap.py` 在构建产物中可正确工作
 - host bundle 查询输出正常
 - 单元测试通过
+- `.venv` 不存在时的系统 `python3` fallback 已写入 skill 文档
 
 ## 当前限制
 
@@ -76,7 +79,7 @@ OpenClaw 推荐路径：
 ## 建议发布说明
 
 ```text
-local-rag-kb-skill v0.1.0
+ local-rag-kb-skill v0.1.1
 
 A reusable local RAG skill for OpenClaw, Codex, and Claude Code.
 
@@ -85,6 +88,7 @@ Highlights:
 - incremental ingestion with document registry + ChromaDB
 - host-orchestrated answering with references
 - improved OpenClaw installation flow and .venv bootstrap behavior
+- documented fallback to system python3 when venv/ensurepip is unavailable
 
 Recommended assets:
 - local-rag-kb-openclaw.zip

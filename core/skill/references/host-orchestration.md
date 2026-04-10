@@ -4,15 +4,21 @@ When `CHAT_BACKEND=host`, the Python runtime does not generate the final answer.
 
 Instead:
 
-1. ensure the skill-local `.venv/bin/python` exists
-2. run `.venv/bin/python scripts/kb_query.py --host <host> --question "<question>" --emit-host-bundle`
-3. treat the JSON output as the only evidence package
-4. ask the host model to answer using only:
+1. prefer the skill-local `.venv/bin/python`
+2. if `.venv/bin/python` is unavailable because bootstrap failed or `ensurepip` is missing, use system `python3` instead
+3. system `python3` is acceptable only when it can import:
+   - `openai`
+   - `chromadb`
+   - `dotenv`
+   - `tqdm`
+4. run either `.venv/bin/python scripts/kb_query.py --host <host> --question "<question>" --emit-host-bundle` or `python3 scripts/kb_query.py --host <host> --question "<question>" --emit-host-bundle`
+5. treat the JSON output as the only evidence package
+6. ask the host model to answer using only:
    - `instructions`
    - `contexts`
    - `references`
-5. require bracket citations like `[1]`
-6. show a `References:` section using the provided references only
+7. require bracket citations like `[1]`
+8. show a `References:` section using the provided references only
 
 Use `--show-details` only for debugging. In that mode the bundle may also include raw hits.
 

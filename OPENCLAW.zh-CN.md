@@ -53,6 +53,8 @@
 3. 初始化 skill 自己的 `.venv`
 4. 配置 `.env`
 
+如果宿主环境不支持创建 `.venv`，也可以退回系统 `python3` 直接运行，但前提是系统 Python 已安装依赖。
+
 默认安装目录：
 
 - `~/.agents/skills/local-rag-kb`
@@ -73,6 +75,8 @@
 2. 创建 `.venv`
 3. 执行 `tools/build_targets.py --host openclaw`
 4. 执行 `tools/sync_targets.py --host openclaw`
+
+如果系统不支持 `python3 -m venv`，可以跳过第 2 步，但需要确保系统 `python3` 已安装依赖。
 
 ## 首次配置
 
@@ -103,6 +107,36 @@ bootstrap 完成后，宿主应优先用 skill 自己的解释器：
 - `.venv/bin/python scripts/kb_ingest.py ...`
 - `.venv/bin/python scripts/kb_query.py ...`
 
+### `.venv` 创建失败时的 fallback
+
+如果 OpenClaw 提示：
+
+- `ensurepip is not available`
+- `python3 -m venv` 不可用
+
+不要把这当成 skill 无法运行。
+
+此时改用下面的策略：
+
+1. 不再强制创建 `.venv`
+2. 检查系统 `python3` 是否已安装依赖：
+   - `openai`
+   - `chromadb`
+   - `dotenv`
+   - `tqdm`
+3. 如果缺少依赖，并且宿主允许安装用户级 Python 包，执行：
+   - `python3 -m pip install --user openai chromadb python-dotenv tqdm`
+4. 后续直接用系统 `python3` 运行：
+   - `python3 scripts/kb_ingest.py ...`
+   - `python3 scripts/kb_query.py ...`
+   - `python3 scripts/kb_status.py ...`
+
+结论：
+
+- 优先使用 `.venv`
+- `.venv` 不可用时，允许 fallback 到系统 `python3`
+- fallback 成立的前提是依赖已经可导入
+
 ## OpenClaw 对话安装提示词
 
 下面这些提示词适用于“OpenClaw 具备 GitHub 下载 / shell / 文件操作能力”的情况。
@@ -115,6 +149,10 @@ bootstrap 完成后，宿主应优先用 skill 自己的解释器：
 把它安装到 ~/.agents/skills/local-rag-kb。
 如果目录里没有 .env，就用 .env.example 创建一份 .env。
 然后运行 python3 scripts/kb_bootstrap.py 初始化这个 skill 的本地 .venv。
+如果因为 ensurepip 或 python3 -m venv 不可用而失败，不要停止。
+改为检查系统 python3 是否已安装 openai、chromadb、python-dotenv、tqdm。
+如果缺少依赖，就尝试运行 python3 -m pip install --user openai chromadb python-dotenv tqdm。
+之后直接用系统 python3 运行这个 skill。
 完成后告诉我还需要我提供哪些环境变量。
 ```
 
@@ -135,6 +173,10 @@ Prefer the GitHub Release asset named local-rag-kb-openclaw.zip.
 Install it into ~/.agents/skills/local-rag-kb.
 If .env does not exist, create it from .env.example.
 Then run python3 scripts/kb_bootstrap.py inside the installed skill directory.
+If bootstrap fails because ensurepip or python3 -m venv is unavailable, do not stop.
+Check whether system python3 already has openai, chromadb, python-dotenv, and tqdm.
+If needed, try python3 -m pip install --user openai chromadb python-dotenv tqdm,
+then run the skill with system python3 instead of a local virtualenv.
 After that, tell me which environment variables still need values.
 ```
 
@@ -168,6 +210,7 @@ Verify that the installed skill contains SKILL.md, scripts, runtime, and .env.ex
 Configure the local-rag-kb skill for OpenClaw.
 Keep LOCAL_RAG_KB_HOST=openclaw in ~/.agents/skills/local-rag-kb/.env and write my EMBEDDING_API_KEY there.
 If I do not specify EMBEDDING_BASE_URL or EMBEDDING_MODEL, use https://api.openai.com/v1 and text-embedding-3-small.
+If .venv cannot be created, use system python3 instead of failing, as long as the required Python packages are installed.
 Do not ingest anything yet. Just confirm when the skill is ready.
 ```
 
@@ -179,6 +222,7 @@ Do not ingest anything yet. Just confirm when the skill is ready.
 Use $local-rag-kb to ingest this zip into my default knowledge base.
 If the uploaded file has a readable local path, use it directly.
 If not, tell me clearly that the attachment path is unavailable.
+If .venv is unavailable, use system python3 instead of failing.
 ```
 
 ### 导入一个 markdown 文件到指定知识库
@@ -200,6 +244,7 @@ Use $local-rag-kb to append this txt file to my existing default knowledge base.
 Use $local-rag-kb to answer this question from my local knowledge base:
 为什么一个上游依赖故障会同时影响很多 AI 产品？
 Answer with citations and keep the response concise.
+If .venv is unavailable, use system python3 instead of failing.
 ```
 
 ### 查询指定知识库
@@ -239,10 +284,12 @@ Use $local-rag-kb to delete the knowledge base named default and ask me to confi
 OpenClaw 编排这个 skill 时，推荐遵循下面的顺序：
 
 1. 如果 `.venv/bin/python` 不存在，先运行 `python3 scripts/kb_bootstrap.py`
-2. 后续一律优先使用 `.venv/bin/python`
-3. 查询时运行 `kb_query.py --emit-host-bundle`
-4. 最终答案由宿主主模型根据 bundle 生成
-5. 默认只展示答案和引用，不展示 raw chunk
+2. 如果 `.venv` 因 `ensurepip` 或 `python3 -m venv` 不可用而创建失败，回退到系统 `python3`
+3. 只有在系统 `python3` 能导入 `openai`、`chromadb`、`dotenv`、`tqdm` 时，fallback 才成立
+4. 后续优先使用 `.venv/bin/python`，否则使用系统 `python3`
+5. 查询时运行 `kb_query.py --emit-host-bundle`
+6. 最终答案由宿主主模型根据 bundle 生成
+7. 默认只展示答案和引用，不展示 raw chunk
 
 ## 常见问题
 
@@ -266,3 +313,22 @@ OpenClaw 编排这个 skill 时，推荐遵循下面的顺序：
 如果需要自定义目录，可以设置：
 
 - `LOCAL_RAG_KB_DATA_DIR=/your/path`
+
+### 4. 不用虚拟环境能运行吗？
+
+可以。
+
+当前 skill 不是强制要求 `.venv` 才能运行。`.venv` 只是优先路径，不是唯一运行方式。
+
+如果系统 `python3` 已安装这些依赖：
+
+- `openai`
+- `chromadb`
+- `python-dotenv`
+- `tqdm`
+
+那么 OpenClaw 可以直接使用系统 `python3` 调用：
+
+- `python3 scripts/kb_ingest.py`
+- `python3 scripts/kb_query.py`
+- `python3 scripts/kb_status.py`
