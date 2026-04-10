@@ -2,6 +2,8 @@
 
 This project is distributed as a buildable multi-host skill. Build from the repo, then sync the generated target to the host you want to use.
 
+For an OpenClaw-oriented workflow and prompt examples, see [OPENCLAW.zh-CN.md](OPENCLAW.zh-CN.md).
+
 ## 1. Install dependencies
 
 ```bash

@@ -5,6 +5,8 @@
 它可以从单文件或压缩包中导入 Markdown / 文本资料，写入本地 ChromaDB，维护增量更新注册表，并产出带引用的检索上下文或最终回答。
 
 English README: [README.md](README.md)
+OpenClaw 使用文档: [OPENCLAW.zh-CN.md](OPENCLAW.zh-CN.md)
+发布文案: [RELEASE_NOTES.zh-CN.md](RELEASE_NOTES.zh-CN.md)
 
 ## 功能
 
@@ -147,6 +149,8 @@ CHAT_MODEL=gpt-5.4 \
 3. 后续接入 OpenClaw 的 skill registry 或 install-from-GitHub 流程
 
 仅有 GitHub 仓库本身，通常还不等于“纯对话安装”；这一步仍取决于 OpenClaw 是否提供仓库安装或 registry 分发能力。
+
+如果你主要面向 OpenClaw 用户，请继续阅读 [OPENCLAW.zh-CN.md](OPENCLAW.zh-CN.md)。
 
 ## 验证
 

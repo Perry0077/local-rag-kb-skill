@@ -5,6 +5,8 @@ A reusable local RAG skill project for Codex, OpenClaw, and Claude Code.
 It ingests markdown or text documents from single files or archives, stores vectors in a local ChromaDB, keeps a document registry for incremental updates, and returns answer-ready context with references.
 
 中文说明: [README.zh-CN.md](README.zh-CN.md)
+OpenClaw guide: [OPENCLAW.zh-CN.md](OPENCLAW.zh-CN.md)
+Release notes: [RELEASE_NOTES.zh-CN.md](RELEASE_NOTES.zh-CN.md)
 
 ## What it does
 
@@ -171,6 +173,8 @@ For OpenClaw users who want AI-conversation install instead of manual download:
 - integrate with an OpenClaw skill registry or install-from-GitHub flow when that distribution path is available
 
 GitHub alone is the source of truth, but conversational installation still depends on the host supporting registry-based or repo-based skill install.
+
+For a more OpenClaw-specific install and usage guide, see [OPENCLAW.zh-CN.md](OPENCLAW.zh-CN.md).
 
 ## Validation
 
