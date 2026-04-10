@@ -1,0 +1,5 @@
+Notes
+
+People who do not write code can still launch simple products quickly with AI tools.
+
+The key is describing the task clearly and iterating from a rough first version.

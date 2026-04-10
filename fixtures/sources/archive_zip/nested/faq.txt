@@ -1,0 +1,5 @@
+FAQ
+
+Users often ask whether one broken dependency can take down many products.
+
+The answer is yes when those products share the same critical provider in the request path.

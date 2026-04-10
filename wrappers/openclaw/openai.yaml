@@ -1,0 +1,7 @@
+interface:
+  display_name: "Local RAG KB"
+  short_description: "Build and query a local file-backed RAG knowledge base."
+  default_prompt: "Use $local-rag-kb to ingest these files into a local knowledge base, emit a host answer bundle, and answer with references."
+
+policy:
+  allow_implicit_invocation: true

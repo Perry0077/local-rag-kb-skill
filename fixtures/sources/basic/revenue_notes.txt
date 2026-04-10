@@ -1,0 +1,5 @@
+Revenue Notes
+
+Small recurring payments can be a healthy sign, but repeated unusually low payments usually point to a pricing bug.
+
+When this happens, verify the order amount against the paid amount on the server side.

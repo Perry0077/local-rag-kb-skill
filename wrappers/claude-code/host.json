@@ -1,0 +1,4 @@
+{
+  "host_name": "claude-code",
+  "trigger_snippet": "In Claude Code, use attachment or workspace paths only when they resolve to readable local files. If the host does not expose a file as a local path, say that ingestion cannot start until a readable path is available."
+}

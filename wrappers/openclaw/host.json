@@ -1,0 +1,4 @@
+{
+  "host_name": "openclaw",
+  "trigger_snippet": "When OpenClaw exposes uploaded attachments as local paths, pass those paths directly into `scripts/kb_ingest.py`. If an attachment is mentioned but no readable local path is available, stop and say that the attachment path is unavailable in the current host context."
+}

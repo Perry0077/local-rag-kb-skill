@@ -1,0 +1,4 @@
+{
+  "host_name": "codex",
+  "trigger_snippet": "In Codex, prefer local file paths or installed attachment paths. If the user refers to an upload but the file is not readable from the environment, explain that a readable local path is required before ingestion can proceed."
+}
